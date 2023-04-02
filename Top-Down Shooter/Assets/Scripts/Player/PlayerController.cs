@@ -27,6 +27,18 @@ public class PlayerController : MonoBehaviour
     private bool _canAim;
 
     public bool Alive;
+
+    [System.Serializable]
+    public class BulletPool
+    {
+        public string tag;
+        public GameObject prefab;
+        public int size;
+    }
+
+    public List<BulletPool> pools;
+    public Dictionary<string, Queue<GameObject>> poolDictionary;
+
     // Start is called before the first frame update
     void Awake()
     {
@@ -34,7 +46,22 @@ public class PlayerController : MonoBehaviour
         _playerInput = new PlayerInputs();
         _rb = GetComponent<Rigidbody2D>();
         Alive = true;
-       
+
+        poolDictionary = new Dictionary<string, Queue<GameObject>>();
+
+        foreach (BulletPool pool in pools)
+        {
+            Queue<GameObject> objectPool = new Queue<GameObject>();
+
+            for (int i = 0; i < pool.size; i++)
+            {
+                GameObject obj = Instantiate(pool.prefab);
+                obj.SetActive(false);
+                objectPool.Enqueue(obj);
+            }
+            poolDictionary.Add(pool.tag, objectPool);
+        }
+
         //Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Confined;
     }
